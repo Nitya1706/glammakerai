@@ -1,0 +1,255 @@
+/* ================================
+   CREATE ACCOUNT PAGE
+================================ */
+
+.register-page {
+    margin: 0;
+    background: #fbf7f3;
+    color: #302522;
+    font-family: 'Montserrat', sans-serif;
+}
+
+
+/* HEADER */
+
+.register-header {
+    height: 80px;
+    padding: 0 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-bottom: 1px solid #e8dfd7;
+}
+
+.register-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 600;
+    color: #302522;
+    text-decoration: none;
+}
+
+.register-back {
+    font-size: 12px;
+    color: #302522;
+    text-decoration: none;
+}
+
+.register-back:hover {
+    color: #a4774f;
+}
+
+
+/* MAIN */
+
+.register-container {
+    min-height: calc(100vh - 81px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 80px;
+    padding: 55px 7%;
+    box-sizing: border-box;
+}
+
+
+/* IMAGE */
+
+.register-image {
+    width: 430px;
+    height: 570px;
+    overflow: hidden;
+}
+
+.register-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* FORM */
+
+.register-box {
+    width: 430px;
+}
+
+.register-eyebrow {
+    margin: 0 0 12px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #a4774f;
+    font-weight: 600;
+}
+
+.register-box h1 {
+    margin: 0 0 18px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    line-height: 1;
+    font-weight: 500;
+}
+
+.register-box h1 em {
+    color: #a4774f;
+    font-weight: 500;
+}
+
+.register-description {
+    margin: 0 0 30px;
+    max-width: 390px;
+    color: #756b65;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+
+/* INPUT */
+
+.register-input {
+    margin-bottom: 17px;
+}
+
+.register-input label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.register-field {
+    display: flex;
+    align-items: center;
+    height: 47px;
+    border: 1px solid #d8cec5;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.register-field i {
+    width: 45px;
+    text-align: center;
+    color: #a4774f;
+    font-size: 13px;
+}
+
+.register-field input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding-right: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    color: #302522;
+}
+
+.register-field:focus-within {
+    border-color: #a4774f;
+}
+
+
+/* TERMS */
+
+.register-terms {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0 20px;
+    font-size: 10px;
+    color: #756b65;
+}
+
+.register-terms input {
+    accent-color: #a4774f;
+}
+
+
+/* BUTTON */
+
+.register-button {
+    width: 100%;
+    height: 50px;
+    border: none;
+    background: #a4774f;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+.register-button span {
+    margin-left: 12px;
+    font-size: 15px;
+}
+
+.register-button:hover {
+    background: #8d633f;
+}
+
+
+/* LOGIN LINK */
+
+.register-login {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    color: #756b65;
+}
+
+.register-login a {
+    color: #a4774f;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-login a:hover {
+    text-decoration: underline;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 850px) {
+
+    .register-container {
+        flex-direction: column;
+        gap: 40px;
+        padding: 40px 6%;
+    }
+
+    .register-image {
+        width: 100%;
+        max-width: 430px;
+        height: 400px;
+    }
+
+    .register-box {
+        width: 100%;
+        max-width: 430px;
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .register-header {
+        padding: 0 5%;
+    }
+
+    .register-logo {
+        font-size: 32px;
+    }
+
+    .register-container {
+        padding: 30px 5%;
+    }
+
+    .register-box h1 {
+        font-size: 44px;
+    }
+
+}

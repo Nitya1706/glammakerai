@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Try On | GlamMaker</title>
+
+    <link rel="stylesheet" href="tryon.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- HEADER -->
+
+    <header class="tryon-header">
+
+        <a href="index.html" class="tryon-logo">
+            GlamMaker
+        </a>
+
+        <a href="index.html" class="home-link">
+            ← Back to Home
+        </a>
+
+    </header>
+
+
+    <!-- PAGE -->
+
+    <main class="tryon-page">
+
+
+        <!-- TITLE -->
+
+        <section class="page-heading">
+
+            <p>YOUR STYLE EXPERIENCE</p>
+
+            <h1>
+                See how it <em>comes together.</em>
+            </h1>
+
+            <span>
+                Upload your outfit and jewellery to create your look.
+            </span>
+
+        </section>
+
+        <section class="selection-summary" id="selectionSummary" hidden aria-live="polite">
+            <p>YOUR SELECTED LOOK</p>
+            <h2 id="selectedOccasion"></h2>
+            <span id="selectedJewelleryAreas"></span>
+            <a href="occasions.html" class="change-selection" id="changeSelection">Change selection</a>
+        </section>
+
+
+        <!-- UPLOAD SECTION -->
+
+        <form id="tryonForm">
+
+        <section class="upload-section">
+
+
+            <!-- OUTFIT -->
+
+            <div class="upload-card">
+
+                <div class="upload-number">
+                    01
+                </div>
+
+                <div class="upload-icon">
+                    <i class="fa-regular fa-image"></i>
+                </div>
+
+                <h2>
+                    Upload Your Outfit
+                </h2>
+
+                <p>
+                    Add a photo of the outfit you want to style.
+                </p>
+
+
+                <label for="outfitInput" class="upload-button">
+                    CHOOSE OUTFIT
+                </label>
+
+                <input
+                    type="file"
+                    id="outfitInput"
+                    name="outfit"
+                    accept="image/*"
+                    hidden
+                >
+
+                <div class="file-name" id="outfitFileName">
+                    No image selected
+                </div>
+
+            </div>
+
+
+            <!-- JEWELLERY -->
+
+            <div class="upload-card">
+
+                <div class="upload-number">
+                    02
+                </div>
+
+                <div class="upload-icon">
+                    <i class="fa-regular fa-gem"></i>
+                </div>
+
+                <h2>
+                    Upload Jewellery
+                </h2>
+
+                <p>
+                    Add the jewellery you want to try with your outfit.
+                </p>
+
+
+                <label for="jewelleryInput" class="upload-button">
+                    CHOOSE JEWELLERY
+                </label>
+
+                <input
+                    type="file"
+                    id="jewelleryInput"
+                    name="jewellery"
+                    accept="image/*"
+                    hidden
+                >
+
+                <div class="file-name" id="jewelleryFileName">
+                    No image selected
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- STYLE PREFERENCES -->
+
+        <section class="preferences-section">
+
+            <div class="preferences-heading">
+
+                <p>STYLE PREFERENCES</p>
+
+                <h2>
+                    Tell us about your <em>look.</em>
+                </h2>
+
+            </div>
+
+
+            <div class="preferences-grid">
+
+
+
+                <!-- STYLE DESCRIPTION -->
+
+<div class="style-description">
+
+    <label for="styleDescription">
+        Tell Us About Your Style
+    </label>
+
+    <textarea
+        id="styleDescription"
+        name="styleDescription"
+        placeholder="Tell us what kind of jewellery or look you are looking for..."
+        rows="5"
+    ></textarea>
+
+    <small>
+        For example: "I want something elegant and traditional, but not too heavy."
+    </small>
+
+</div>
+
+
+            <!-- TRY BUTTON -->
+
+            <button id="tryOnButton" class="tryon-button" type="submit">
+
+                TRY ON
+
+                <span>→</span>
+
+            </button>
+
+            <p class="message" id="message"></p>
+
+        </section>
+
+        </form>
+
+
+        <!-- PREVIEW -->
+
+        <section class="preview-section" id="previewSection">
+
+            <div class="preview-heading">
+
+                <p>YOUR LOOK</p>
+
+                <h2>
+                    See them <em>together.</em>
+                </h2>
+
+            </div>
+
+
+            <div class="preview-box">
+
+                <!-- OUTFIT -->
+
+                <img
+                    id="outfitPreview"
+                    class="outfit-preview"
+                    src=""
+                    alt="Outfit preview"
+                >
+
+
+                <!-- JEWELLERY -->
+
+                <img
+                    id="jewelleryPreview"
+                    class="jewellery-preview"
+                    src=""
+                    alt="Jewellery preview"
+                >
+
+                <img
+                    id="tryonResultPreview"
+                    class="tryon-result-preview"
+                    src=""
+                    alt="Outfit with selected jewellery"
+                >
+
+
+                <div class="preview-placeholder" id="previewPlaceholder">
+
+                    <i class="fa-regular fa-gem"></i>
+
+                    <p>
+                        Your look will appear here
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <script src="/js/tryon.js"></script>
+
+</body>
+
+</html>

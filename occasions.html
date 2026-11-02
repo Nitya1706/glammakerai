@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Occasion | GlamMaker</title>
+    <link rel="stylesheet" href="occasions.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="occasion-page">
+    <header class="occasion-header">
+        <a href="index.html" class="occasion-logo">GlamMaker</a>
+        <a href="index.html#occasions" class="back-home">← Back to occasions</a>
+    </header>
+
+    <main>
+        <section class="occasion-hero">
+            <p>MAKE IT YOUR MOMENT</p>
+            <h1 id="categoryTitle">Choose your <em>occasion.</em></h1>
+            <p class="occasion-intro">Select the occasion and jewellery areas you want to style. Your choices will follow you to Try On.</p>
+        </section>
+
+        <form id="occasionSelectionForm" class="selection-layout">
+            <section class="selection-panel" aria-labelledby="occasionPanelTitle">
+                <div class="panel-heading">
+                    <span>01</span>
+                    <div>
+                        <p>YOUR MOMENT</p>
+                        <h2 id="occasionPanelTitle">Select an occasion</h2>
+                    </div>
+                </div>
+                <div id="occasionOptions" class="occasion-choice-list"></div>
+            </section>
+
+            <section class="selection-panel" aria-labelledby="jewelleryPanelTitle">
+                <div class="panel-heading">
+                    <span>02</span>
+                    <div>
+                        <p>YOUR DETAILS</p>
+                        <h2 id="jewelleryPanelTitle">Choose jewellery areas</h2>
+                    </div>
+                </div>
+                <p class="panel-hint">Choose one or more areas to include in your look.</p>
+                <div id="jewelleryOptions" class="jewellery-choice-list"></div>
+                <button class="tryon-button" id="continueToTryOn" type="submit" disabled>
+                    CONTINUE TO TRY ON <span>→</span>
+                </button>
+                <p class="selection-message" id="selectionMessage" aria-live="polite">Select an occasion and at least one jewellery area.</p>
+            </section>
+        </form>
+    </main>
+
+    <script src="occasions.js"></script>
+</body>
+</html>

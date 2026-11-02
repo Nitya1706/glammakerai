@@ -1,0 +1,758 @@
+AI Jewellery Recommendation
+
+Now we start the AI part of GlamMaker.
+
+In this step, the user selects:
+
+Occasion
+Outfit type
+Style
+Jewellery preference
+
+Then GlamMaker analyzes these inputs and recommends suitable jewellery.
+
+Flow
+User
+ ↓
+Select Occasion
+ ↓
+Select Outfit
+ ↓
+Select Style
+ ↓
+AI Recommendation Engine
+ ↓
+Recommended Jewellery
+ ↓
+Save Recommendation in MongoDB
+
+For this first AI module, we'll use a rule-based AI recommendation engine. This is a good starting point because it works locally without requiring an expensive external AI API.
+
+7.1 Create AI folder
+
+Inside your project:
+
+GlamMaker/
+│
+├── backend/
+│   ├── app.py
+│   ├── database.py
+│   │
+│   └── ai/
+│       ├── __init__.py
+│       └── recommendation.py
+│
+├── frontend/
+│
+└── uploads/
+
+Create:
+
+backend/ai/
+
+and inside it:
+
+__init__.py
+recommendation.py
+7.2 Create recommendation.py
+
+Open:
+
+backend/ai/recommendation.py
+
+Add:
+
+def recommend_jewellery(
+    occasion,
+    outfit,
+    style
+):
+
+    occasion = occasion.lower()
+    outfit = outfit.lower()
+    style = style.lower()
+
+
+    recommendations = []
+
+
+    # Wedding
+    if occasion == "wedding":
+
+        if style == "traditional":
+
+            recommendations = [
+                "Kundan Necklace",
+                "Jhumka Earrings",
+                "Maang Tikka",
+                "Bangles"
+            ]
+
+        elif style == "royal":
+
+            recommendations = [
+                "Polki Necklace",
+                "Chandbali Earrings",
+                "Maang Tikka",
+                "Gold Bangles"
+            ]
+
+        else:
+
+            recommendations = [
+                "Gold Necklace",
+                "Jhumka Earrings",
+                "Bangles"
+            ]
+
+
+    # Mehndi
+    elif occasion == "mehndi":
+
+        recommendations = [
+            "Floral Jewellery",
+            "Jhumka Earrings",
+            "Choker Necklace",
+            "Colorful Bangles"
+        ]
+
+
+    # Haldi
+    elif occasion == "haldi":
+
+        recommendations = [
+            "Floral Necklace",
+            "Floral Earrings",
+            "Minimal Bangles"
+        ]
+
+
+    # Sangeet
+    elif occasion == "sangeet":
+
+        recommendations = [
+            "Statement Necklace",
+            "Chandbali Earrings",
+            "Designer Bracelet"
+        ]
+
+
+    # Reception
+    elif occasion == "reception":
+
+        recommendations = [
+            "Diamond Necklace",
+            "Drop Earrings",
+            "Diamond Bracelet"
+        ]
+
+
+    # Party
+    elif occasion == "party":
+
+        recommendations = [
+            "Statement Earrings",
+            "Layered Necklace",
+            "Fashion Bracelet"
+        ]
+
+
+    # Casual
+    elif occasion == "casual":
+
+        recommendations = [
+            "Stud Earrings",
+            "Minimal Necklace",
+            "Simple Bracelet"
+        ]
+
+
+    # Default
+    else:
+
+        recommendations = [
+            "Stud Earrings",
+            "Simple Necklace",
+            "Bracelet"
+        ]
+
+
+    # Outfit adjustment
+
+    if "saree" in outfit:
+
+        recommendations.append(
+            "Traditional Saree Jewellery"
+        )
+
+    elif "lehenga" in outfit:
+
+        recommendations.append(
+            "Lehenga Choker Set"
+        )
+
+    elif "gown" in outfit:
+
+        recommendations.append(
+            "Elegant Pendant"
+        )
+
+
+    # Style adjustment
+
+    if style == "minimal":
+
+        recommendations = recommendations[:3]
+
+    elif style == "modern":
+
+        recommendations = [
+            item for item in recommendations
+            if "Floral" not in item
+        ]
+
+
+    # Remove duplicates
+
+    recommendations = list(
+        dict.fromkeys(recommendations)
+    )
+
+
+    return recommendations
+7.3 Connect AI to Flask
+
+Open:
+
+backend/app.py
+
+Add:
+
+from ai.recommendation import recommend_jewellery
+7.4 Create AI API
+
+Add this route to app.py:
+
+@app.route(
+    "/api/ai/recommend",
+    methods=["POST"]
+)
+def ai_recommend():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "success": False,
+            "message": "Please login first"
+        }), 401
+
+
+    data = request.get_json()
+
+
+    occasion = data.get(
+        "occasion",
+        ""
+    )
+
+    outfit = data.get(
+        "outfit",
+        ""
+    )
+
+    style = data.get(
+        "style",
+        ""
+    )
+
+
+    if not occasion:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Please select an occasion"
+        }), 400
+
+
+    recommendations = recommend_jewellery(
+        occasion,
+        outfit,
+        style
+    )
+
+
+    recommendation_data = {
+
+        "user_id":
+            session["user_id"],
+
+        "occasion":
+            occasion,
+
+        "outfit":
+            outfit,
+
+        "style":
+            style,
+
+        "recommendations":
+            recommendations,
+
+        "created_at":
+            datetime.utcnow()
+    }
+
+
+    recommendation_collection.insert_one(
+        recommendation_data
+    )
+
+
+    return jsonify({
+
+        "success": True,
+
+        "recommendations":
+            recommendations
+    })
+7.5 Create AI Recommendation page
+
+You can add the feature directly to your existing tryon.html, but I recommend creating a separate page first.
+
+Create:
+
+frontend/ai-recommendation.html
+
+Add:
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GlamMaker AI Recommendation</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <main>
+
+        <h1>
+            GlamMaker AI
+        </h1>
+
+        <h2>
+            Jewellery Recommendation
+        </h2>
+
+
+        <form id="recommendationForm">
+
+
+            <label>
+                Occasion
+            </label>
+
+            <select id="occasion">
+
+                <option value="">
+                    Select Occasion
+                </option>
+
+                <option value="wedding">
+                    Wedding
+                </option>
+
+                <option value="mehndi">
+                    Mehndi
+                </option>
+
+                <option value="haldi">
+                    Haldi
+                </option>
+
+                <option value="sangeet">
+                    Sangeet
+                </option>
+
+                <option value="reception">
+                    Reception
+                </option>
+
+                <option value="party">
+                    Party
+                </option>
+
+                <option value="casual">
+                    Casual
+                </option>
+
+            </select>
+
+
+            <br><br>
+
+
+            <label>
+                Outfit
+            </label>
+
+            <select id="outfit">
+
+                <option value="">
+                    Select Outfit
+                </option>
+
+                <option value="saree">
+                    Saree
+                </option>
+
+                <option value="lehenga">
+                    Lehenga
+                </option>
+
+                <option value="gown">
+                    Gown
+                </option>
+
+                <option value="dress">
+                    Dress
+                </option>
+
+            </select>
+
+
+            <br><br>
+
+
+            <label>
+                Style
+            </label>
+
+            <select id="style">
+
+                <option value="">
+                    Select Style
+                </option>
+
+                <option value="traditional">
+                    Traditional
+                </option>
+
+                <option value="royal">
+                    Royal
+                </option>
+
+                <option value="modern">
+                    Modern
+                </option>
+
+                <option value="minimal">
+                    Minimal
+                </option>
+
+            </select>
+
+
+            <br><br>
+
+
+            <button type="submit">
+
+                Get AI Recommendation
+
+            </button>
+
+        </form>
+
+
+        <div id="recommendationResult">
+
+        </div>
+
+    </main>
+
+
+    <script src="/js/ai-recommendation.js"></script>
+
+</body>
+
+</html>
+7.6 Create JavaScript
+
+Create:
+
+frontend/js/ai-recommendation.js
+
+Add:
+
+const form =
+    document.getElementById(
+        "recommendationForm"
+    );
+
+
+const result =
+    document.getElementById(
+        "recommendationResult"
+    );
+
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const occasion =
+            document.getElementById(
+                "occasion"
+            ).value;
+
+
+        const outfit =
+            document.getElementById(
+                "outfit"
+            ).value;
+
+
+        const style =
+            document.getElementById(
+                "style"
+            ).value;
+
+
+        if (!occasion) {
+
+            result.innerHTML =
+                "<p>Please select an occasion.</p>";
+
+            return;
+        }
+
+
+        result.innerHTML =
+            "<p>AI is analyzing your style...</p>";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/ai/recommend",
+                    {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            occasion:
+                                occasion,
+
+                            outfit:
+                                outfit,
+
+                            style:
+                                style
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                result.innerHTML =
+                    `<p>${data.message}</p>`;
+
+                return;
+            }
+
+
+            let html =
+                "<h3>✨ AI Recommendations</h3>";
+
+
+            html += "<ul>";
+
+
+            data.recommendations.forEach(
+                function(item) {
+
+                    html +=
+                        `<li>${item}</li>`;
+                }
+            );
+
+
+            html += "</ul>";
+
+
+            result.innerHTML = html;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            result.innerHTML =
+                "<p>AI recommendation failed.</p>";
+        }
+
+    }
+);
+7.7 Add page route
+
+In app.py:
+
+@app.route("/ai-recommendation.html")
+def ai_recommendation_page():
+
+    return send_from_directory(
+        FRONTEND_FOLDER,
+        "ai-recommendation.html"
+    )
+7.8 Add button to Dashboard
+
+Open:
+
+frontend/dashboard.html
+
+Add:
+
+<a href="/ai-recommendation.html">
+    🤖 AI Jewellery Recommendation
+</a>
+
+Now your dashboard will have:
+
+Dashboard
+│
+├── Virtual Try-On
+│
+├── AI Jewellery Recommendation
+│
+├── Try-On History
+│
+└── Logout
+7.9 Test the AI
+
+Start Flask:
+
+.\.venv\Scripts\python.exe .\backend\app.py
+
+Open:
+
+http://127.0.0.1:5000/login.html
+
+Login and go to:
+
+Dashboard
+
+Then:
+
+AI Jewellery Recommendation
+
+Select:
+
+Occasion → Wedding
+Outfit   → Saree
+Style    → Traditional
+
+Click:
+
+Get AI Recommendation
+
+You should get something like:
+
+✨ AI Recommendations
+
+• Kundan Necklace
+• Jhumka Earrings
+• Maang Tikka
+• Bangles
+• Traditional Saree Jewellery
+7.10 Check MongoDB
+
+Open:
+
+mongosh
+
+Then:
+
+use glammaker
+
+Run:
+
+db.recommendations.find().pretty()
+
+You should see:
+
+{
+    user_id: "...",
+    occasion: "wedding",
+    outfit: "saree",
+    style: "traditional",
+    recommendations: [
+        "Kundan Necklace",
+        "Jhumka Earrings",
+        "Maang Tikka",
+        "Bangles"
+    ],
+    created_at: ...
+}
+Your GlamMaker is now becoming this
+                    GlamMaker
+                        │
+          ┌─────────────┴─────────────┐
+          │                           │
+       Frontend                    Backend
+          │                           │
+    HTML/CSS/JS                    Flask
+          │                           │
+          └─────────────┬─────────────┘
+                        │
+                     MongoDB
+                        │
+          ┌─────────────┴─────────────┐
+          │                           │
+       User Data                  Try-On Data
+                                      │
+                                History
+                                      │
+                              AI Recommendation
+                                      │
+                          ┌───────────┴───────────┐
+                          │                       │
+                       Occasion                Outfit
+                          │                       │
+                          └───────────┬───────────┘
+                                      │
+                                  AI Engine
+                                      │
+                               Jewellery Result

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | GlamMaker</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+</head>
+
+
+<body class="login-page">
+
+
+    <!-- HEADER -->
+
+    <header class="login-header">
+
+        <a href="index.html" class="login-logo">
+            GlamMaker
+        </a>
+
+        <a href="index.html" class="back-home">
+            ← Back to Home
+        </a>
+
+    </header>
+
+
+    <!-- LOGIN -->
+
+    <main class="login-container">
+
+
+        <!-- IMAGE -->
+
+        <div class="login-image">
+
+            <img
+                src="images/hero10.jpg"
+                alt="Elegant woman wearing jewellery"
+            >
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <div class="login-box">
+
+            <p class="login-eyebrow">
+                WELCOME BACK
+            </p>
+
+            <h1>
+                Welcome to<br>
+                <em>GlamMaker.</em>
+            </h1>
+
+            <p class="login-description">
+                Sign in to continue your jewellery styling journey.
+            </p>
+
+
+            <form id="loginForm">
+
+
+                <!-- EMAIL -->
+
+                <div class="input-group">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="input-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- OPTIONS -->
+
+                <div class="login-options">
+
+                    <label class="remember">
+
+                        <input
+                            type="checkbox"
+                            name="remember"
+                        >
+
+                        <span>Remember me</span>
+
+                    </label>
+
+
+                    <a href="#">
+                        Forgot Password?
+                    </a>
+
+                </div>
+
+
+                <!-- BUTTON -->
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    LOGIN
+                    <span>→</span>
+                </button>
+
+
+            </form>
+
+            <p id="loginMessage" aria-live="polite"></p>
+
+
+            <!-- REGISTER -->
+
+            <p class="register-text">
+
+                Don't have an account?
+
+                <a href="register.html">
+                    Create an account
+                </a>
+
+            </p>
+
+
+        </div>
+
+    </main>
+
+    <script src="/js/auth.js"></script>
+
+</body>
+
+</html>

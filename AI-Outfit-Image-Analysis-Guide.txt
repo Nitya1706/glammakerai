@@ -1,0 +1,661 @@
+AI Outfit Image Analysis
+
+Now we will make GlamMaker more intelligent.
+
+In Step 7, the user selected the outfit from a dropdown.
+In Step 8, the user will upload an outfit image, and our AI module will analyze it.
+
+Step 8 flow
+User uploads outfit image
+          ↓
+Flask Backend
+          ↓
+AI Image Analysis
+          ↓
+Detect:
+  • Outfit type
+  • Dominant color
+  • Style
+  • Occasion
+          ↓
+Jewellery recommendations
+          ↓
+Save analysis in MongoDB
+
+For this step, we'll use computer vision with OpenCV for basic image/color analysis. This is a real image-processing module and gives us a good foundation for a more advanced ML model later.
+
+8.1 Install OpenCV
+
+Open PowerShell inside your GlamMaker project:
+
+.\.venv\Scripts\python.exe -m pip install opencv-python
+
+Check:
+
+.\.venv\Scripts\python.exe -c "import cv2; print(cv2.__version__)"
+
+You should get a version such as:
+
+4.x.x
+8.2 Create AI analysis file
+
+Your folder should now be:
+
+backend/
+│
+├── app.py
+├── database.py
+│
+└── ai/
+    ├── __init__.py
+    ├── recommendation.py
+    └── outfit_analysis.py
+
+Create:
+
+backend/ai/outfit_analysis.py
+8.3 Add image analysis code
+
+Put this inside outfit_analysis.py:
+
+import cv2
+
+
+def analyze_outfit(image_path):
+
+    image = cv2.imread(image_path)
+
+    if image is None:
+        return {
+            "success": False,
+            "message": "Unable to read image"
+        }
+
+
+    # Resize image
+    image = cv2.resize(
+        image,
+        (300, 300)
+    )
+
+
+    # Calculate average BGR color
+    average_color = image.mean(
+        axis=(0, 1)
+    )
+
+
+    blue = average_color[0]
+    green = average_color[1]
+    red = average_color[2]
+
+
+    # Detect dominant color
+    if red > 180 and green > 180 and blue > 180:
+
+        color = "White"
+
+    elif red > green * 1.3 and red > blue * 1.3:
+
+        color = "Red"
+
+    elif green > red * 1.2 and green > blue * 1.2:
+
+        color = "Green"
+
+    elif blue > red * 1.2 and blue > green * 1.2:
+
+        color = "Blue"
+
+    elif red > 120 and green > 80 and blue < 100:
+
+        color = "Yellow"
+
+    elif red > 100 and blue > 80:
+
+        color = "Pink/Purple"
+
+    else:
+
+        color = "Mixed"
+
+
+    # Simple brightness calculation
+    gray = cv2.cvtColor(
+        image,
+        cv2.COLOR_BGR2GRAY
+    )
+
+    brightness = gray.mean()
+
+
+    if brightness > 180:
+
+        style = "Light / Elegant"
+
+    elif brightness < 80:
+
+        style = "Dark / Bold"
+
+    else:
+
+        style = "Balanced"
+
+
+    return {
+
+        "success": True,
+
+        "color": color,
+
+        "style": style,
+
+        "brightness": round(
+            float(brightness),
+            2
+        ),
+
+        "message":
+            "Outfit analyzed successfully"
+    }
+What this does
+
+The program reads the uploaded image and calculates:
+
+Image
+ ↓
+OpenCV
+ ↓
+Average Color
+ ↓
+Brightness
+ ↓
+Style
+
+For example:
+
+Outfit Color: Red
+Style: Dark / Bold
+8.4 Connect it to Flask
+
+Open:
+
+backend/app.py
+
+Add:
+
+from ai.outfit_analysis import analyze_outfit
+8.5 Create AI analysis API
+
+Add this route:
+
+@app.route(
+    "/api/ai/analyze-outfit",
+    methods=["POST"]
+)
+def analyze_outfit_api():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "success": False,
+            "message": "Please login first"
+        }), 401
+
+
+    outfit = request.files.get("outfit")
+
+
+    if not outfit:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Please upload an outfit image"
+        }), 400
+
+
+    if not allowed_file(outfit.filename):
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Invalid image format"
+        }), 400
+
+
+    filename = (
+        str(uuid.uuid4())
+        + "_"
+        + secure_filename(
+            outfit.filename
+        )
+    )
+
+
+    filepath = os.path.join(
+        OUTFIT_FOLDER,
+        filename
+    )
+
+
+    outfit.save(filepath)
+
+
+    analysis = analyze_outfit(
+        filepath
+    )
+
+
+    if not analysis["success"]:
+
+        return jsonify(analysis), 400
+
+
+    analysis_data = {
+
+        "user_id":
+            session["user_id"],
+
+        "image":
+            filename,
+
+        "color":
+            analysis["color"],
+
+        "style":
+            analysis["style"],
+
+        "brightness":
+            analysis["brightness"],
+
+        "created_at":
+            datetime.utcnow()
+    }
+
+
+    recommendation_collection.insert_one(
+        analysis_data
+    )
+
+
+    return jsonify({
+
+        "success": True,
+
+        "analysis": analysis
+    })
+8.6 Create Outfit Analysis page
+
+Create:
+
+frontend/outfit-analysis.html
+
+Add:
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GlamMaker AI Outfit Analysis</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <main>
+
+        <h1>
+            GlamMaker AI
+        </h1>
+
+        <h2>
+            Outfit Image Analysis
+        </h2>
+
+
+        <form id="analysisForm">
+
+            <label>
+                Upload Your Outfit
+            </label>
+
+            <br><br>
+
+            <input
+                type="file"
+                id="outfitImage"
+                accept="image/*"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit">
+                Analyze Outfit
+            </button>
+
+        </form>
+
+
+        <div id="preview"></div>
+
+
+        <div id="analysisResult"></div>
+
+    </main>
+
+
+    <script src="/js/outfit-analysis.js"></script>
+
+</body>
+
+</html>
+8.7 Create JavaScript
+
+Create:
+
+frontend/js/outfit-analysis.js
+
+Add:
+
+const form =
+    document.getElementById(
+        "analysisForm"
+    );
+
+
+const imageInput =
+    document.getElementById(
+        "outfitImage"
+    );
+
+
+const preview =
+    document.getElementById(
+        "preview"
+    );
+
+
+const result =
+    document.getElementById(
+        "analysisResult"
+    );
+
+
+// Image preview
+
+imageInput.addEventListener(
+    "change",
+    function() {
+
+        const file =
+            imageInput.files[0];
+
+        if (!file) {
+            return;
+        }
+
+
+        const imageURL =
+            URL.createObjectURL(file);
+
+
+        preview.innerHTML = `
+
+            <br>
+
+            <img
+                src="${imageURL}"
+                width="300"
+                alt="Outfit Preview"
+            >
+
+        `;
+    }
+);
+
+
+// Submit
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const file =
+            imageInput.files[0];
+
+
+        if (!file) {
+
+            result.innerHTML =
+                "<p>Please select an image.</p>";
+
+            return;
+        }
+
+
+        const formData =
+            new FormData();
+
+
+        formData.append(
+            "outfit",
+            file
+        );
+
+
+        result.innerHTML =
+            "<p>🤖 AI is analyzing your outfit...</p>";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/ai/analyze-outfit",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                result.innerHTML =
+                    `<p>${data.message}</p>`;
+
+                return;
+            }
+
+
+            const analysis =
+                data.analysis;
+
+
+            result.innerHTML = `
+
+                <h2>
+                    ✨ AI Analysis Result
+                </h2>
+
+                <p>
+                    <strong>Dominant Color:</strong>
+                    ${analysis.color}
+                </p>
+
+                <p>
+                    <strong>Style:</strong>
+                    ${analysis.style}
+                </p>
+
+                <p>
+                    <strong>Brightness:</strong>
+                    ${analysis.brightness}
+                </p>
+
+                <p>
+                    ${analysis.message}
+                </p>
+
+            `;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            result.innerHTML =
+                "<p>AI analysis failed.</p>";
+        }
+
+    }
+);
+8.8 Add Flask route
+
+In backend/app.py add:
+
+@app.route("/outfit-analysis.html")
+def outfit_analysis_page():
+
+    return send_from_directory(
+        FRONTEND_FOLDER,
+        "outfit-analysis.html"
+    )
+8.9 Add button to Dashboard
+
+Open:
+
+frontend/dashboard.html
+
+Add:
+
+<a href="/outfit-analysis.html">
+    🤖 AI Outfit Analysis
+</a>
+
+Your dashboard now has:
+
+Dashboard
+│
+├── Virtual Try-On
+│
+├── AI Jewellery Recommendation
+│
+├── AI Outfit Analysis
+│
+├── Try-On History
+│
+└── Logout
+8.10 Test Step 8
+
+Start your project:
+
+.\.venv\Scripts\python.exe .\backend\app.py
+
+Open:
+
+http://127.0.0.1:5000/login.html
+
+Login.
+
+Go to:
+
+Dashboard
+    ↓
+AI Outfit Analysis
+
+Upload an image.
+
+For example, upload a saree image.
+
+Click:
+
+Analyze Outfit
+
+You should see something similar to:
+
+✨ AI Analysis Result
+
+Dominant Color: Red
+
+Style: Balanced
+
+Brightness: 132.45
+
+Outfit analyzed successfully
+8.11 Check MongoDB
+
+Open:
+
+mongosh
+
+Then:
+
+use glammaker
+
+Check:
+
+db.recommendations.find().pretty()
+
+You should see the analysis:
+
+{
+    user_id: "...",
+    image: "...jpg",
+    color: "Red",
+    style: "Balanced",
+    brightness: 132.45,
+    created_at: ...
+}
+Important: what is actually AI here?
+
+At this stage, we are using computer vision/image processing, not a trained deep-learning model.
+
+So your project architecture is now:
+
+                  GLAMMAKER
+                      │
+        ┌─────────────┴─────────────┐
+        │                           │
+     FRONTEND                    BACKEND
+        │                           │
+   HTML/CSS/JS                   Flask
+                                    │
+                         ┌──────────┴──────────┐
+                         │                     │
+                      MongoDB              AI Layer
+                                               │
+                                  ┌────────────┴────────────┐
+                                  │                         │
+                           Recommendation             OpenCV
+                             Engine                Image Analysis
+Step 8 completed
+
+You now have two AI-related modules:
+
+🤖 AI Jewellery Recommendation
+👗 AI Outfit Image Analysis

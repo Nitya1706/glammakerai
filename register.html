@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Create Account | GlamMaker</title>
+
+    <!-- Your existing main CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Register page CSS -->
+    <link rel="stylesheet" href="register.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+
+<body class="register-page">
+
+
+    <!-- HEADER -->
+
+    <header class="register-header">
+
+        <a href="index.html" class="register-logo">
+            GlamMaker
+        </a>
+
+        <a href="index.html" class="register-back">
+            ← Back to Home
+        </a>
+
+    </header>
+
+
+
+    <!-- CREATE ACCOUNT -->
+
+    <main class="register-container">
+
+
+        <!-- LEFT IMAGE -->
+
+        <div class="register-image">
+
+            <img
+                src="images/hero10.jpg"
+                alt="Elegant woman wearing jewellery"
+            >
+
+        </div>
+
+
+
+        <!-- RIGHT FORM -->
+
+        <div class="register-box">
+
+
+            <p class="register-eyebrow">
+                BEGIN YOUR JOURNEY
+            </p>
+
+
+            <h1>
+                Create your<br>
+                <em>GlamMaker.</em>
+            </h1>
+
+
+            <p class="register-description">
+                Create your account and discover jewellery
+                that belongs with your look.
+            </p>
+
+
+
+            <form id="registerForm">
+
+
+                <!-- FULL NAME -->
+
+                <div class="register-input">
+
+                    <label for="name">
+                        Full Name
+                    </label>
+
+                    <div class="register-field">
+
+                        <i class="fa-regular fa-user"></i>
+
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            placeholder="Enter your full name"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- EMAIL -->
+
+                <div class="register-input">
+
+                    <label for="email">
+                        Email Address
+                    </label>
+
+                    <div class="register-field">
+
+                        <i class="fa-regular fa-envelope"></i>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- PASSWORD -->
+
+                <div class="register-input">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="register-field">
+
+                        <i class="fa-solid fa-lock"></i>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Create a password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- CONFIRM PASSWORD -->
+
+                <div class="register-input">
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
+
+                    <div class="register-field">
+
+                        <i class="fa-solid fa-lock"></i>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            name="confirm-password"
+                            placeholder="Confirm your password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TERMS -->
+
+                <label class="register-terms">
+
+                    <input
+                        type="checkbox"
+                        required
+                    >
+
+                    <span>
+                        I agree to the Terms & Conditions
+                    </span>
+
+                </label>
+
+
+
+                <!-- CREATE BUTTON -->
+
+                <button
+                    type="submit"
+                    class="register-button"
+                >
+
+                    CREATE ACCOUNT
+
+                    <span>→</span>
+
+                </button>
+
+
+            </form>
+
+            <p class="register-message" id="registerMessage" aria-live="polite"></p>
+
+
+
+            <!-- LOGIN LINK -->
+
+            <p class="register-login">
+
+                Already have an account?
+
+                <a href="login.html">
+                    Login
+                </a>
+
+            </p>
+
+
+        </div>
+
+    </main>
+
+    <script src="/js/auth.js"></script>
+
+</body>
+
+</html>

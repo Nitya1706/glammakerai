@@ -1,0 +1,795 @@
+AI Outfit → Occasion → Jewellery Matching
+
+Now we will connect Step 7 + Step 8.
+
+Instead of asking the user to manually select everything, GlamMaker will:
+
+Upload Outfit Image
+        ↓
+AI analyzes image
+        ↓
+Detect color + style
+        ↓
+Predict suitable occasion
+        ↓
+Recommend jewellery
+        ↓
+Save complete result in MongoDB
+
+This makes the project feel much more like a real AI styling system.
+
+9.1 Create the AI matching file
+
+Your structure should be:
+
+backend/
+│
+├── app.py
+├── database.py
+│
+└── ai/
+    ├── __init__.py
+    ├── recommendation.py
+    ├── outfit_analysis.py
+    └── style_matcher.py
+
+Create:
+
+backend/ai/style_matcher.py
+9.2 Add occasion prediction
+
+Put this code in style_matcher.py:
+
+def predict_occasion(outfit_color, outfit_style):
+
+    color = outfit_color.lower()
+    style = outfit_style.lower()
+
+    # Dark and bold outfits
+    if "dark" in style:
+
+        if color in ["red", "purple", "blue"]:
+            return "Reception"
+
+        return "Party"
+
+    # Light outfits
+    if "light" in style:
+
+        if color in ["yellow", "pink", "white"]:
+            return "Haldi"
+
+        return "Casual"
+
+    # Balanced outfits
+    if "balanced" in style:
+
+        if color in ["red", "maroon", "gold"]:
+            return "Wedding"
+
+        if color in ["green", "pink"]:
+            return "Mehndi"
+
+        return "Sangeet"
+
+    return "Casual"
+
+This takes the information from Step 8 and predicts a likely occasion.
+
+9.3 Add jewellery matching
+
+Below the previous function, add:
+
+def match_jewellery(
+    occasion,
+    outfit_color,
+    outfit_style
+):
+
+    occasion = occasion.lower()
+    color = outfit_color.lower()
+
+    if occasion == "wedding":
+
+        jewellery = [
+            "Kundan Necklace",
+            "Jhumka Earrings",
+            "Maang Tikka",
+            "Gold Bangles"
+        ]
+
+    elif occasion == "mehndi":
+
+        jewellery = [
+            "Floral Jewellery",
+            "Colorful Bangles",
+            "Jhumka Earrings"
+        ]
+
+    elif occasion == "haldi":
+
+        jewellery = [
+            "Floral Necklace",
+            "Floral Earrings",
+            "Minimal Bangles"
+        ]
+
+    elif occasion == "sangeet":
+
+        jewellery = [
+            "Statement Necklace",
+            "Chandbali Earrings",
+            "Designer Bracelet"
+        ]
+
+    elif occasion == "reception":
+
+        jewellery = [
+            "Diamond Necklace",
+            "Drop Earrings",
+            "Diamond Bracelet"
+        ]
+
+    elif occasion == "party":
+
+        jewellery = [
+            "Statement Earrings",
+            "Layered Necklace",
+            "Fashion Bracelet"
+        ]
+
+    else:
+
+        jewellery = [
+            "Stud Earrings",
+            "Minimal Necklace",
+            "Simple Bracelet"
+        ]
+
+
+    # Color matching
+
+    if color == "red":
+
+        jewellery.append(
+            "Gold Jewellery"
+        )
+
+    elif color == "blue":
+
+        jewellery.append(
+            "Silver Jewellery"
+        )
+
+    elif color == "green":
+
+        jewellery.append(
+            "Gold and Emerald Jewellery"
+        )
+
+    elif color == "white":
+
+        jewellery.append(
+            "Diamond Jewellery"
+        )
+
+    elif color == "yellow":
+
+        jewellery.append(
+            "Gold Jewellery"
+        )
+
+
+    return list(
+        dict.fromkeys(jewellery)
+    )
+9.4 Create the complete AI styling function
+
+At the bottom of style_matcher.py add:
+
+def generate_style_match(
+    outfit_color,
+    outfit_style
+):
+
+    occasion = predict_occasion(
+        outfit_color,
+        outfit_style
+    )
+
+    jewellery = match_jewellery(
+        occasion,
+        outfit_color,
+        outfit_style
+    )
+
+    return {
+        "occasion": occasion,
+        "jewellery": jewellery
+    }
+
+Now the AI pipeline is:
+
+Color
+ +
+Style
+ ↓
+Occasion
+ ↓
+Jewellery
+9.5 Connect it to Flask
+
+Open:
+
+backend/app.py
+
+Add:
+
+from ai.style_matcher import generate_style_match
+9.6 Create the complete AI styling API
+
+Add this route:
+
+@app.route(
+    "/api/ai/style-match",
+    methods=["POST"]
+)
+def ai_style_match():
+
+    if "user_id" not in session:
+
+        return jsonify({
+            "success": False,
+            "message": "Please login first"
+        }), 401
+
+
+    outfit = request.files.get("outfit")
+
+
+    if not outfit:
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Please upload an outfit image"
+        }), 400
+
+
+    if not allowed_file(outfit.filename):
+
+        return jsonify({
+            "success": False,
+            "message":
+                "Invalid image format"
+        }), 400
+
+
+    filename = (
+        str(uuid.uuid4())
+        + "_"
+        + secure_filename(
+            outfit.filename
+        )
+    )
+
+
+    filepath = os.path.join(
+        OUTFIT_FOLDER,
+        filename
+    )
+
+
+    outfit.save(filepath)
+
+
+    # Step 8 AI analysis
+    analysis = analyze_outfit(
+        filepath
+    )
+
+
+    if not analysis["success"]:
+
+        return jsonify(analysis), 400
+
+
+    # Step 9 AI style matching
+    style_match = generate_style_match(
+
+        analysis["color"],
+
+        analysis["style"]
+    )
+
+
+    # Save complete result
+    style_data = {
+
+        "user_id":
+            session["user_id"],
+
+        "image":
+            filename,
+
+        "color":
+            analysis["color"],
+
+        "style":
+            analysis["style"],
+
+        "brightness":
+            analysis["brightness"],
+
+        "occasion":
+            style_match["occasion"],
+
+        "jewellery":
+            style_match["jewellery"],
+
+        "created_at":
+            datetime.utcnow()
+    }
+
+
+    recommendation_collection.insert_one(
+        style_data
+    )
+
+
+    return jsonify({
+
+        "success": True,
+
+        "analysis": {
+
+            "color":
+                analysis["color"],
+
+            "style":
+                analysis["style"],
+
+            "brightness":
+                analysis["brightness"]
+        },
+
+        "occasion":
+            style_match["occasion"],
+
+        "jewellery":
+            style_match["jewellery"]
+    })
+9.7 Create the AI Stylist page
+
+Create:
+
+frontend/ai-stylist.html
+
+Use:
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GlamMaker AI Stylist</title>
+
+    <link
+        rel="stylesheet"
+        href="/css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <main>
+
+        <h1>
+            ✨ GlamMaker AI Stylist
+        </h1>
+
+        <p>
+            Upload your outfit and let AI
+            create a jewellery style for you.
+        </p>
+
+
+        <form id="stylistForm">
+
+            <label>
+                Upload Outfit
+            </label>
+
+            <br><br>
+
+            <input
+                type="file"
+                id="stylistImage"
+                accept="image/*"
+                required
+            >
+
+            <br><br>
+
+            <button type="submit">
+                ✨ Analyze My Style
+            </button>
+
+        </form>
+
+
+        <div id="stylistPreview"></div>
+
+
+        <div id="stylistResult"></div>
+
+    </main>
+
+
+    <script src="/js/ai-stylist.js"></script>
+
+</body>
+
+</html>
+9.8 Create ai-stylist.js
+
+Create:
+
+frontend/js/ai-stylist.js
+
+Add:
+
+const form =
+    document.getElementById(
+        "stylistForm"
+    );
+
+
+const imageInput =
+    document.getElementById(
+        "stylistImage"
+    );
+
+
+const preview =
+    document.getElementById(
+        "stylistPreview"
+    );
+
+
+const result =
+    document.getElementById(
+        "stylistResult"
+    );
+
+
+// Preview image
+
+imageInput.addEventListener(
+    "change",
+    function() {
+
+        const file =
+            imageInput.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        const imageURL =
+            URL.createObjectURL(file);
+
+        preview.innerHTML = `
+
+            <br>
+
+            <img
+                src="${imageURL}"
+                width="300"
+                alt="Outfit Preview"
+            >
+
+        `;
+    }
+);
+
+
+// AI analysis
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const file =
+            imageInput.files[0];
+
+
+        if (!file) {
+
+            result.innerHTML =
+                "<p>Please select an image.</p>";
+
+            return;
+        }
+
+
+        const formData =
+            new FormData();
+
+
+        formData.append(
+            "outfit",
+            file
+        );
+
+
+        result.innerHTML = `
+            <p>
+                🤖 AI is analyzing your outfit...
+            </p>
+        `;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/ai/style-match",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!data.success) {
+
+                result.innerHTML =
+                    `<p>${data.message}</p>`;
+
+                return;
+            }
+
+
+            let jewelleryHTML = "";
+
+
+            data.jewellery.forEach(
+                function(item) {
+
+                    jewelleryHTML += `
+                        <li>${item}</li>
+                    `;
+
+                }
+            );
+
+
+            result.innerHTML = `
+
+                <div class="ai-result">
+
+                    <h2>
+                        ✨ AI Style Result
+                    </h2>
+
+                    <p>
+                        <strong>
+                            Outfit Color:
+                        </strong>
+
+                        ${data.analysis.color}
+                    </p>
+
+
+                    <p>
+                        <strong>
+                            Outfit Style:
+                        </strong>
+
+                        ${data.analysis.style}
+                    </p>
+
+
+                    <p>
+                        <strong>
+                            Suggested Occasion:
+                        </strong>
+
+                        ${data.occasion}
+                    </p>
+
+
+                    <h3>
+                        💎 Recommended Jewellery
+                    </h3>
+
+
+                    <ul>
+                        ${jewelleryHTML}
+                    </ul>
+
+                </div>
+
+            `;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            result.innerHTML =
+                "<p>AI analysis failed.</p>";
+        }
+
+    }
+);
+9.9 Add Flask page route
+
+In app.py:
+
+@app.route("/ai-stylist.html")
+def ai_stylist_page():
+
+    return send_from_directory(
+        FRONTEND_FOLDER,
+        "ai-stylist.html"
+    )
+9.10 Add button to Dashboard
+
+Open:
+
+frontend/dashboard.html
+
+Add:
+
+<a href="/ai-stylist.html">
+    ✨ AI Personal Stylist
+</a>
+
+Your dashboard now becomes:
+
+GlamMaker Dashboard
+│
+├── Virtual Try-On
+│
+├── AI Jewellery Recommendation
+│
+├── AI Outfit Analysis
+│
+├── AI Personal Stylist
+│
+├── Try-On History
+│
+└── Logout
+9.11 Test Step 9
+
+Run:
+
+.\.venv\Scripts\python.exe .\backend\app.py
+
+Login:
+
+http://127.0.0.1:5000/login.html
+
+Go to:
+
+Dashboard
+ ↓
+AI Personal Stylist
+
+Upload an outfit.
+
+For example:
+
+Red Saree
+
+The system might produce:
+
+✨ AI Style Result
+
+Outfit Color:
+Red
+
+Outfit Style:
+Balanced
+
+Suggested Occasion:
+Wedding
+
+Recommended Jewellery:
+
+• Kundan Necklace
+• Jhumka Earrings
+• Maang Tikka
+• Gold Bangles
+• Gold Jewellery
+9.12 Check MongoDB
+
+Open:
+
+mongosh
+
+Then:
+
+use glammaker
+
+Run:
+
+db.recommendations.find().sort({
+    created_at: -1
+}).pretty()
+
+Now the database stores the complete AI styling result:
+
+{
+    user_id: "...",
+
+    image: "...jpg",
+
+    color: "Red",
+
+    style: "Balanced",
+
+    brightness: 135.42,
+
+    occasion: "Wedding",
+
+    jewellery: [
+        "Kundan Necklace",
+        "Jhumka Earrings",
+        "Maang Tikka",
+        "Gold Bangles",
+        "Gold Jewellery"
+    ],
+
+    created_at: ...
+}
+What Step 9 adds
+
+Previously:
+
+User selects everything
+       ↓
+Recommendation
+
+Now:
+
+              OUTFIT IMAGE
+                   ↓
+              AI ANALYSIS
+                   ↓
+        ┌──────────┴──────────┐
+        ↓                     ↓
+      COLOR                  STYLE
+        └──────────┬──────────┘
+                   ↓
+           OCCASION PREDICTION
+                   ↓
+          JEWELLERY MATCHING
+                   ↓
+             FINAL RESULT
+                   ↓
+                MongoDB
+Your GlamMaker AI modules so far
+Step	Feature
+Step 7	💎 Jewellery Recommendation
+Step 8	👗 Outfit Image Analysis
+Step 9	✨ AI Personal Stylist

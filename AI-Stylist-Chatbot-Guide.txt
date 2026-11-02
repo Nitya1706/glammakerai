@@ -1,0 +1,587 @@
+AI Stylist Chatbot
+
+In Step 9, GlamMaker can analyze an outfit and recommend jewellery. Now we will add a chatbot where the user can ask questions like:
+
+"What jewellery should I wear with a red saree?"
+"Suggest jewellery for a wedding."
+"What should I wear for Haldi?"
+"Which jewellery is best with blue dress?"
+"Give me a simple look for reception."
+
+For now, we will make it local and beginner-friendly, without requiring an external paid AI API.
+
+10.1 Create AI chatbot file
+
+Create:
+
+backend/
+└── ai/
+    └── chatbot.py
+
+Add:
+
+def get_stylist_response(message):
+    message = message.lower().strip()
+
+    # Wedding
+    if "wedding" in message:
+        return {
+            "reply": "For a wedding, try Kundan or Polki jewellery with Jhumka earrings, Maang Tikka and Gold Bangles."
+        }
+
+    # Mehndi
+    if "mehndi" in message:
+        return {
+            "reply": "For Mehndi, floral jewellery, colorful bangles and Jhumka earrings are a great choice."
+        }
+
+    # Haldi
+    if "haldi" in message:
+        return {
+            "reply": "For Haldi, choose light and colorful floral jewellery with a simple necklace and earrings."
+        }
+
+    # Sangeet
+    if "sangeet" in message:
+        return {
+            "reply": "For Sangeet, try statement jewellery, Chandbali earrings and a designer bracelet."
+        }
+
+    # Reception
+    if "reception" in message:
+        return {
+            "reply": "For a reception, Diamond jewellery, Drop earrings and a Diamond bracelet will give an elegant look."
+        }
+
+    # Red outfit
+    if "red" in message:
+        return {
+            "reply": "For a red outfit, Gold jewellery is a beautiful match. Try a Gold necklace and Jhumka earrings."
+        }
+
+    # Blue outfit
+    if "blue" in message:
+        return {
+            "reply": "For a blue outfit, Silver or Diamond jewellery works very well. Try Drop earrings with a simple necklace."
+        }
+
+    # Green outfit
+    if "green" in message:
+        return {
+            "reply": "For a green outfit, Gold and Emerald jewellery can create a beautiful traditional look."
+        }
+
+    # Saree
+    if "saree" in message:
+        return {
+            "reply": "With a saree, try a traditional necklace, Jhumka earrings, bangles and a Maang Tikka."
+        }
+
+    # Lehenga
+    if "lehenga" in message:
+        return {
+            "reply": "With a lehenga, a Choker necklace, Chandbali earrings and Maang Tikka are excellent choices."
+        }
+
+    # Casual
+    if "casual" in message:
+        return {
+            "reply": "For a casual look, keep it simple with Stud earrings, a Minimal necklace and a small bracelet."
+        }
+
+    # Greeting
+    if "hello" in message or "hi" in message or "hey" in message:
+        return {
+            "reply": "Hello! 👋 I am your GlamMaker AI Stylist. Tell me about your outfit or occasion."
+        }
+
+    # Help
+    if "help" in message:
+        return {
+            "reply": "You can ask me about jewellery for Wedding, Mehndi, Haldi, Sangeet, Reception, Saree, Lehenga or different outfit colors."
+        }
+
+    return {
+        "reply": "I can help you choose jewellery. Tell me your outfit color, outfit type or occasion."
+    }
+10.2 Add chatbot API to app.py
+
+At the top of app.py, add:
+
+from ai.chatbot import get_stylist_response
+
+Then add:
+
+@app.route("/api/ai/chat", methods=["POST"])
+def ai_chat():
+
+    if "user_id" not in session:
+        return jsonify({
+            "success": False,
+            "message": "Please login first"
+        }), 401
+
+    data = request.get_json()
+
+    message = data.get("message", "").strip()
+
+    if not message:
+        return jsonify({
+            "success": False,
+            "message": "Please enter a message"
+        }), 400
+
+    result = get_stylist_response(message)
+
+    return jsonify({
+        "success": True,
+        "reply": result["reply"]
+    })
+10.3 Create chatbot page
+
+Create:
+
+frontend/
+└── ai-stylist-chat.html
+
+Use:
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>GlamMaker AI Stylist</title>
+
+    <link rel="stylesheet"
+          href="/css/style.css">
+
+</head>
+
+<body>
+
+    <header>
+
+        <nav>
+
+            <h2>GlamMaker</h2>
+
+            <div>
+                <a href="/dashboard.html">Dashboard</a>
+                <a href="/ai-stylist.html">AI Stylist</a>
+                <a href="/history.html">History</a>
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <main>
+
+        <section class="chat-container">
+
+            <h1>✨ GlamMaker AI Stylist</h1>
+
+            <p>
+                Ask me anything about your jewellery and styling.
+            </p>
+
+
+            <div id="chatBox" class="chat-box">
+
+                <div class="bot-message">
+
+                    Hello! 👋
+
+                    <br><br>
+
+                    I am your GlamMaker AI Stylist.
+
+                    <br>
+
+                    Tell me about your outfit or occasion.
+
+                </div>
+
+            </div>
+
+
+            <form id="chatForm">
+
+                <input
+                    type="text"
+                    id="message"
+                    placeholder="Ask about your style..."
+                    autocomplete="off"
+                    required
+                >
+
+                <button type="submit">
+                    Send ✨
+                </button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+    <script src="/js/ai-stylist-chat.js"></script>
+
+</body>
+
+</html>
+10.4 Create JavaScript
+
+Create:
+
+frontend/js/ai-stylist-chat.js
+
+Add:
+
+const chatForm = document.getElementById("chatForm");
+const messageInput = document.getElementById("message");
+const chatBox = document.getElementById("chatBox");
+
+
+chatForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const message = messageInput.value.trim();
+
+    if (!message) {
+        return;
+    }
+
+
+    // Show user message
+
+    const userMessage = document.createElement("div");
+
+    userMessage.className = "user-message";
+
+    userMessage.textContent = message;
+
+    chatBox.appendChild(userMessage);
+
+
+    messageInput.value = "";
+
+
+    try {
+
+        const response = await fetch("/api/ai/chat", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                message: message
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        const botMessage = document.createElement("div");
+
+        botMessage.className = "bot-message";
+
+
+        if (data.success) {
+
+            botMessage.textContent = data.reply;
+
+        } else {
+
+            botMessage.textContent =
+                data.message || "Something went wrong.";
+
+        }
+
+
+        chatBox.appendChild(botMessage);
+
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        const errorMessage =
+            document.createElement("div");
+
+        errorMessage.className =
+            "bot-message";
+
+        errorMessage.textContent =
+            "Unable to connect to AI Stylist.";
+
+        chatBox.appendChild(errorMessage);
+
+    }
+
+});
+10.5 Add chatbot CSS
+
+At the bottom of:
+
+frontend/css/style.css
+
+add:
+
+.chat-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 35px;
+
+    background: rgba(255, 255, 255, 0.75);
+
+    backdrop-filter: blur(15px);
+
+    border-radius: 25px;
+
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+
+.chat-container h1 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+
+.chat-container > p {
+    text-align: center;
+    color: #777;
+}
+
+
+.chat-box {
+    height: 400px;
+
+    overflow-y: auto;
+
+    padding: 20px;
+
+    margin-top: 25px;
+
+    background: #faf7f2;
+
+    border-radius: 18px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+
+.bot-message,
+.user-message {
+    max-width: 75%;
+
+    padding: 14px 18px;
+
+    border-radius: 18px;
+
+    line-height: 1.5;
+}
+
+
+.bot-message {
+    align-self: flex-start;
+
+    background: #fff;
+
+    border: 1px solid #eee;
+}
+
+
+.user-message {
+    align-self: flex-end;
+
+    background: #d9b88f;
+
+    color: white;
+}
+
+
+#chatForm {
+    display: flex;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+
+#message {
+    flex: 1;
+
+    padding: 14px 18px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 30px;
+
+    outline: none;
+
+    font-size: 15px;
+}
+
+
+#chatForm button {
+    padding: 14px 25px;
+
+    border: none;
+
+    border-radius: 30px;
+
+    background: #8b6f47;
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+
+#chatForm button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+
+@media (max-width: 600px) {
+
+    .chat-container {
+        width: 92%;
+
+        padding: 20px;
+    }
+
+
+    .chat-box {
+        height: 350px;
+    }
+
+
+    #chatForm {
+        flex-direction: column;
+    }
+
+
+    #chatForm button {
+        width: 100%;
+    }
+
+}
+10.6 Add route in app.py
+
+If your app.py has a list of allowed frontend pages, add:
+
+"ai-stylist-chat.html"
+
+Or add a direct route:
+
+@app.route("/ai-stylist-chat.html")
+def ai_stylist_chat():
+    return send_from_directory(FRONTEND_DIR, "ai-stylist-chat.html")
+10.7 Add it to Dashboard
+
+In dashboard.html, add:
+
+<a href="/ai-stylist-chat.html">
+    <div class="dashboard-card">
+        <h3>💬 AI Stylist Chat</h3>
+
+        <p>
+            Chat with GlamMaker AI and get
+            personalized jewellery suggestions.
+        </p>
+    </div>
+</a>
+
+Your dashboard will now have:
+
+GlamMaker Dashboard
+│
+├── Virtual Try-On
+├── AI Jewellery Recommendation
+├── AI Outfit Analysis
+├── AI Personal Stylist
+├── 💬 AI Stylist Chat       ← NEW
+├── Try-On History
+└── Logout
+10.8 Run the project
+
+Stop Flask if it is running:
+
+CTRL + C
+
+Then:
+
+cd C:\pawan2\GlamMaker
+
+Use your virtual environment:
+
+.\.venv\Scripts\python.exe .\backend\app.py
+
+Open:
+
+http://127.0.0.1:5000/login.html
+
+Login and open:
+
+http://127.0.0.1:5000/ai-stylist-chat.html
+Test these messages
+What jewellery should I wear for wedding?
+I have a red saree
+What should I wear for mehndi?
+Suggest jewellery for reception
+I have a blue dress
+What Step 10 adds
+
+Your GlamMaker flow is now:
+
+User
+  ↓
+Login
+  ↓
+Upload Outfit
+  ↓
+OpenCV Analysis
+  ↓
+Color + Style
+  ↓
+Occasion Prediction
+  ↓
+Jewellery Recommendation
+  ↓
+AI Stylist Chat
+  ↓
+Personalized Style Advice
+
+Important: this chatbot is currently a rule-based AI-style assistant, not a large language model. The next major upgrade can make GlamMaker use a real ML/vision model for fashion analysis instead of fixed rules.
